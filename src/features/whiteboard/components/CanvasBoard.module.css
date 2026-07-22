@@ -1,0 +1,32 @@
+.canvasWrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+  touch-action: none; /* prevents scrolling while drawing on touch devices */
+}
+
+/* Grid overlay: a separate pseudo-element on top of the canvas,
+   pointer-events disabled so it never intercepts mouse/touch events
+   meant for drawing, and never becomes part of the exported PNG
+   (toDataURL only rasterizes the <canvas> element itself). */
+.gridOn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(128, 128, 128, 0.15) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(128, 128, 128, 0.15) 1px, transparent 1px);
+  background-size: 24px 24px;
+}

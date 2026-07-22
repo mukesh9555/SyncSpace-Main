@@ -1,0 +1,31 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--navbar-height) - var(--space-5) * 2);
+}
+
+.canvasArea {
+  flex: 1;
+  min-height: 0;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: var(--space-2);
+  text-align: center;
+}
+
+.hint kbd {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-family: monospace;
+}
+
+@media (max-width: 640px) {
+  .hint {
+    display: none; /* keyboard shortcuts are irrelevant on touch-only devices */
+  }
+}

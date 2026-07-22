@@ -1,0 +1,91 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.titleInput {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  color: var(--color-text);
+  padding: var(--space-4) var(--space-4) var(--space-2);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+.select {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--fs-sm);
+  color: var(--color-text);
+}
+
+.toolBtn {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--fs-sm);
+  color: var(--color-text);
+}
+
+.toolBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.fontControl {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+
+.fontBtn {
+  background: transparent;
+  border: none;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--fs-sm);
+  color: var(--color-text);
+}
+
+.fontSize {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  min-width: 32px;
+  text-align: center;
+}
+
+.editorWrap {
+  flex: 1;
+  min-height: 0; /* required for Monaco to size correctly inside flex */
+}
+
+@media (max-width: 640px) {
+  .toolbar {
+    gap: var(--space-1);
+  }
+  .toolBtn,
+  .select {
+    font-size: 0.75rem;
+  }
+}

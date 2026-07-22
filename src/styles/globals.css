@@ -1,0 +1,123 @@
+/* ==========================================================================
+   SyncSpace Lite — Global Design Tokens
+   Every feature's CSS Module should reference these variables.
+   Do NOT hardcode colors/spacing/fonts inside feature components.
+   ========================================================================== */
+
+:root {
+  /* Brand colors */
+  --color-primary: #4f46e5;       /* indigo-600 */
+  --color-primary-dark: #4338ca;  /* indigo-700 */
+  --color-primary-light: #eef2ff; /* indigo-50 */
+  --color-accent: #06b6d4;        /* cyan-500 */
+
+  /* Neutrals */
+  --color-bg: #f9fafb;
+  --color-surface: #ffffff;
+  --color-border: #e5e7eb;
+  --color-text: #111827;
+  --color-text-muted: #6b7280;
+
+  /* Feedback */
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
+  --color-warning: #d97706;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Radius & shadow */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
+
+  /* Typography */
+  --font-base: 'Inter', system-ui, -apple-system, sans-serif;
+  --fs-sm: 0.875rem;
+  --fs-base: 1rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.5rem;
+  --fs-2xl: 2rem;
+  --fs-3xl: 2.75rem;
+
+  /* Layout */
+  --sidebar-width: 240px;
+  --navbar-height: 64px;
+  --max-width: 1200px;
+}
+
+/* ==========================================================================
+   Dark Theme Overrides
+   Toggled by ThemeContext via <html data-theme="dark">.
+   Every value here mirrors a token from :root above — same variable
+   names, different values. Components never branch on theme in JS;
+   they just use var(--color-*) and the swap happens for free.
+   ========================================================================== */
+[data-theme='dark'] {
+  --color-bg: #0f1115;
+  --color-surface: #1a1d23;
+  --color-border: #2a2e37;
+  --color-text: #f3f4f6;
+  --color-text-muted: #9ca3af;
+  --color-primary-light: #1e1b4b;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* ==========================================================================
+   Breakpoint reference (documented here, used inside each .module.css):
+     Mobile:  max-width 640px
+     Tablet:  max-width 1024px
+     Desktop: everything above
+   CSS Modules can't share @custom-media in plain CSS without a
+   PostCSS plugin, so each module repeats these two breakpoints
+   literally. Keeping the values documented here keeps them consistent.
+   ========================================================================== */
+
+/* Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-base);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, p {
+  margin: 0;
+}
