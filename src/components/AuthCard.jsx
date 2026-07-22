@@ -1,0 +1,4 @@
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
+import Card from './ui/Card';
+export default function AuthCard() { return <Card className="bg-slate-950 p-8 text-white sm:p-10"><p className="text-sm font-bold uppercase tracking-widest text-violet-300">Ready when you are</p><h2 className="mt-3 max-w-xl text-3xl font-bold sm:text-4xl">Start your next shared session in minutes.</h2><p className="mt-4 max-w-xl leading-7 text-slate-300">Create an account to enter the SyncSpace workspace, then start writing, sketching, and organizing.</p><Link to="/login" className="mt-7 inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100">Create a free account <ArrowRight className="h-4 w-4" /></Link></Card>; }
