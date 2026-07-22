@@ -3,7 +3,7 @@ import ProtectedRoute from './ProtectedRoute';
 import DashboardLayout from '../shared/layouts/DashboardLayout';
 
 import Landing from '../features/landing/Landing';
-import Login from '../features/auth/Login';
+import Login from '../pages/Login';
 import Dashboard from '../features/dashboard/Dashboard';
 import Notes from '../features/notes/Notes';
 import Whiteboard from '../features/whiteboard/Whiteboard';

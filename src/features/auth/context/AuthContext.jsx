@@ -35,13 +35,14 @@ export function AuthProvider({ children }) {
    * then persist a fake user object. There is no password verification
    * against a real database — that arrives with the backend phase.
    */
-  async function login(credentials, register = false) {
+  async function login(credentials, register = false, persist = true) {
     const result = await apiRequest(register ? '/api/auth/register' : '/api/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
     const userData = { ...result.user, loggedInAt: new Date().toISOString() };
-    setItem(STORAGE_KEYS.USER, userData);
+    if (persist) setItem(STORAGE_KEYS.USER, userData);
+    else removeItem(STORAGE_KEYS.USER);
     setUser(userData);
     return userData;
   }
