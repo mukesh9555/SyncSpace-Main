@@ -1,5 +1,6 @@
 export async function apiRequest(path, options = {}) {
   const response = await fetch(path, {
+    credentials: 'include',
     ...options,
     headers: { 'Content-Type': 'application/json', ...options.headers },
   });

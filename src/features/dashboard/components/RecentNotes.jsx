@@ -1,14 +1,31 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getItem, STORAGE_KEYS } from '../../../shared/utils/localStorage';
+import { apiRequest } from '../../../shared/utils/api';
 import styles from './RecentNotes.module.css';
 
-/**
- * Unlike ActivityTimeline/RecentRooms (mock data — no backend for rooms
- * yet), Recent Notes reads REAL data straight from LocalStorage, since
- * the Notes feature is fully implemented in this phase.
- */
 export default function RecentNotes() {
-  const notes = getItem(STORAGE_KEYS.NOTES, []);
+  const [notes, setNotes] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const wsResult = await apiRequest('/api/v1/workspaces');
+        const workspaces = wsResult.workspaces;
+        if (!workspaces.length || cancelled) return;
+
+        const noteResult = await apiRequest(
+          `/api/v1/workspaces/${workspaces[0].id}/notes`,
+        );
+        if (!cancelled) setNotes(noteResult.notes);
+      } catch {
+        // silently fail — dashboard still renders
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
   const recent = [...notes]
     .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
     .slice(0, 4);

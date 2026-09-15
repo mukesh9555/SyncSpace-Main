@@ -1,0 +1,110 @@
+.page {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: var(--space-4);
+  height: calc(100vh - var(--navbar-height) - var(--space-5) * 2);
+}
+
+.sidebar {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.workspaceSelect {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--fs-sm);
+  margin-bottom: var(--space-3);
+  cursor: pointer;
+}
+
+.newBtn {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  margin-bottom: var(--space-3);
+  cursor: pointer;
+}
+
+.newBtn:hover {
+  background: var(--color-primary-dark);
+}
+
+.editorPane {
+  min-width: 0;
+  min-height: 0;
+}
+
+.emptyState {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.statusMsg {
+  padding: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+}
+
+.errorMsg {
+  padding: var(--space-4);
+  color: #dc2626;
+  font-size: var(--fs-sm);
+}
+
+.collabStatus {
+  margin-top: auto;
+  padding: var(--space-3) var(--space-2);
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.collabDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@media (max-width: 1024px) {
+  .page {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    height: auto;
+  }
+  .sidebar {
+    max-height: 260px;
+  }
+  .editorPane {
+    height: 60vh;
+  }
+}

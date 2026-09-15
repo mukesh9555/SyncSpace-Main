@@ -4,7 +4,9 @@ import styles from './Sidebar.module.css';
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: '🏠' },
   { to: '/notes', label: 'Notes', icon: '📝' },
+  { to: '/editor', label: 'Code Editor', icon: '💻' },
   { to: '/whiteboard', label: 'Whiteboard', icon: '🎨' },
+  { to: '/admin', label: 'Admin', icon: '⚙️' },
 ];
 
 /**

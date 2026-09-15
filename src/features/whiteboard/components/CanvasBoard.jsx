@@ -1,35 +1,19 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import styles from './CanvasBoard.module.css';
 
-/**
- * CanvasBoard
- *
- * Drawing state (isDrawing, last point) lives entirely in refs, NOT
- * React state — mousemove fires far too often for setState to be
- * appropriate there (it would force a re-render on every pixel of
- * mouse movement). Only the undo/redo *availability* is reported back
- * to the parent (Whiteboard.jsx) via a callback, since that's the only
- * piece the Toolbar UI actually needs to react to.
- *
- * Undo/redo strategy: after every completed stroke (mouseup), we
- * snapshot the canvas as a PNG dataURL into a history array. Undo/redo
- * just restores a snapshot. Simple and correct for a lightweight
- * whiteboard; a production infinite-canvas app would store vector
- * strokes instead of raster snapshots, but that's out of scope here.
- */
 const CanvasBoard = forwardRef(function CanvasBoard(
-  { tool, color, brushSize, showGrid, onHistoryChange },
+  { tool, color, brushSize, showGrid, onHistoryChange, initialContent, onStrokeComplete },
   ref
 ) {
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
   const isDrawingRef = useRef(false);
   const lastPointRef = useRef({ x: 0, y: 0 });
-  const historyRef = useRef([]); // array of dataURLs
+  const historyRef = useRef([]);
   const historyIndexRef = useRef(-1);
+  const loadedRef = useRef(false);
+  const strokeBufferRef = useRef([]);
 
-  // Keep latest tool/color/brushSize available inside event handlers
-  // that are attached once, without re-attaching listeners every render.
   const settingsRef = useRef({ tool, color, brushSize });
   useEffect(() => {
     settingsRef.current = { tool, color, brushSize };
@@ -45,7 +29,6 @@ const CanvasBoard = forwardRef(function CanvasBoard(
   function pushSnapshot() {
     const canvas = canvasRef.current;
     const dataUrl = canvas.toDataURL('image/png');
-    // Discard any "future" redo states once a new stroke is drawn
     historyRef.current = historyRef.current.slice(0, historyIndexRef.current + 1);
     historyRef.current.push(dataUrl);
     historyIndexRef.current += 1;
@@ -63,7 +46,7 @@ const CanvasBoard = forwardRef(function CanvasBoard(
     img.src = dataUrl;
   }
 
-  // Setup canvas + initial blank snapshot on mount
+  // Setup canvas + load initial content or blank snapshot
   useEffect(() => {
     const canvas = canvasRef.current;
     const parent = canvas.parentElement;
@@ -76,6 +59,23 @@ const CanvasBoard = forwardRef(function CanvasBoard(
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctxRef.current = ctx;
+
+    // Try to load saved content
+    if (initialContent && !loadedRef.current) {
+      loadedRef.current = true;
+      try {
+        const parsed = JSON.parse(initialContent);
+        if (parsed.history && parsed.history.length > 0) {
+          historyRef.current = parsed.history;
+          historyIndexRef.current = parsed.index ?? parsed.history.length - 1;
+          restoreSnapshot(historyRef.current[historyIndexRef.current]);
+          reportHistory();
+          return;
+        }
+      } catch {
+        // corrupted content — fall through to blank canvas
+      }
+    }
 
     pushSnapshot();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -91,6 +91,14 @@ const CanvasBoard = forwardRef(function CanvasBoard(
   function handlePointerDown(e) {
     isDrawingRef.current = true;
     lastPointRef.current = getPoint(e);
+    const { tool: currentTool, color: currentColor, brushSize: currentSize } = settingsRef.current;
+    strokeBufferRef.current = [{
+      type: 'start',
+      tool: currentTool,
+      color: currentColor,
+      size: currentSize,
+      point: lastPointRef.current,
+    }];
   }
 
   function handlePointerMove(e) {
@@ -107,17 +115,28 @@ const CanvasBoard = forwardRef(function CanvasBoard(
     ctx.lineTo(point.x, point.y);
     ctx.stroke();
 
+    strokeBufferRef.current.push({
+      type: 'line',
+      from: lastPointRef.current,
+      to: point,
+      tool: currentTool,
+      color: currentColor,
+      size: currentSize,
+    });
+
     lastPointRef.current = point;
   }
 
   function handlePointerUp() {
     if (!isDrawingRef.current) return;
     isDrawingRef.current = false;
+    strokeBufferRef.current.push({ type: 'end' });
     pushSnapshot();
+    // Broadcast the completed stroke to other users
+    onStrokeComplete?.(strokeBufferRef.current);
+    strokeBufferRef.current = [];
   }
 
-  // Imperative API exposed to Whiteboard.jsx (for Toolbar buttons +
-  // keyboard shortcuts, which live in the parent).
   useImperativeHandle(ref, () => ({
     undo() {
       if (historyIndexRef.current <= 0) return;
@@ -145,6 +164,33 @@ const CanvasBoard = forwardRef(function CanvasBoard(
       a.href = url;
       a.download = 'syncspace-whiteboard.png';
       a.click();
+    },
+    getContent() {
+      return JSON.stringify({
+        history: historyRef.current,
+        index: historyIndexRef.current,
+      });
+    },
+    applyRemoteStroke(stroke) {
+      const ctx = ctxRef.current;
+      if (!ctx || !stroke) return;
+      for (const op of stroke) {
+        if (op.type === 'start') {
+          ctx.strokeStyle = op.tool === 'eraser' ? '#ffffff' : op.color;
+          ctx.lineWidth = op.tool === 'eraser' ? op.size * 2 : op.size;
+          ctx.beginPath();
+          ctx.moveTo(op.point.x, op.point.y);
+        } else if (op.type === 'line') {
+          ctx.strokeStyle = op.tool === 'eraser' ? '#ffffff' : op.color;
+          ctx.lineWidth = op.tool === 'eraser' ? op.size * 2 : op.size;
+          ctx.beginPath();
+          ctx.moveTo(op.from.x, op.from.y);
+          ctx.lineTo(op.to.x, op.to.y);
+          ctx.stroke();
+        }
+      }
+      // Push snapshot so undo/redo includes remote strokes
+      pushSnapshot();
     },
   }));
 

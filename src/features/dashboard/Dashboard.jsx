@@ -1,15 +1,36 @@
+import { useState, useEffect } from 'react';
 import { useAuth } from '../auth/context/AuthContext';
+import { apiRequest } from '../../shared/utils/api';
 import StatCard from './components/StatCard';
 import ActivityTimeline from './components/ActivityTimeline';
 import ProfileWidget from './components/ProfileWidget';
 import RecentNotes from './components/RecentNotes';
 import RecentRooms from './components/RecentRooms';
-import { getItem, STORAGE_KEYS } from '../../shared/utils/localStorage';
 import styles from './Dashboard.module.css';
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const notesCount = getItem(STORAGE_KEYS.NOTES, []).length;
+  const [notesCount, setNotesCount] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const wsResult = await apiRequest('/api/v1/workspaces');
+        const workspaces = wsResult.workspaces;
+        if (!workspaces.length || cancelled) return;
+
+        const noteResult = await apiRequest(
+          `/api/v1/workspaces/${workspaces[0].id}/notes`,
+        );
+        if (!cancelled) setNotesCount(noteResult.notes.length);
+      } catch {
+        // silently fail — dashboard still renders
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <div className={styles.page}>

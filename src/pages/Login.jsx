@@ -22,7 +22,6 @@ export default function Login() {
   const navigate = useNavigate();
   const [registering, setRegistering] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', password: '' });
-  const [remember, setRemember] = useState(true);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -30,20 +29,18 @@ export default function Login() {
 
   async function submit(event) {
     event.preventDefault(); setError(''); setNotice(''); setSubmitting(true);
-    try { await login(form, registering, registering || remember); navigate('/dashboard'); }
+    try { await login(form, registering); navigate('/dashboard'); }
     catch (requestError) { setError(requestError.message); }
     finally { setSubmitting(false); }
   }
-  function social(provider) { setNotice(`${provider} sign-in is a UI placeholder in this mock build.`); }
   function toggleMode() { setRegistering((value) => !value); setError(''); setNotice(''); }
 
   return <div className="flex min-h-screen bg-sync-bg"><AuthIllustration /><main className="flex w-full items-center justify-center p-5 sm:p-8 lg:w-2/5 lg:p-10"><motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="w-full max-w-md"><Card className="p-7 sm:p-10"><div className="text-center"><Link to="/" className="inline-flex items-center gap-2"><span className="grid h-10 w-10 place-items-center rounded-xl bg-sync-primary shadow-sm"><Zap className="h-6 w-6 fill-white text-white" /></span><span className="text-3xl font-extrabold tracking-tight">SyncSpace</span></Link><h1 className="mt-7 text-3xl font-bold tracking-tight">{registering ? 'Create your account' : 'Welcome back'}</h1><p className="mt-2 text-sync-text-secondary">{registering ? 'Start collaborating with your team today.' : 'Continue to your collaborative workspace.'}</p></div>
         <form onSubmit={submit} className="mt-8 grid gap-5" noValidate>{registering && <Input label="Full name" placeholder="Alex Johnson" value={form.name} onChange={update('name')} minLength="2" required />}<Input label="Email address" icon={Mail} type="email" placeholder="you@company.com" value={form.email} onChange={update('email')} required /><Input label="Password" icon={Lock} type="password" placeholder="At least 6 characters" value={form.password} onChange={update('password')} minLength="6" required />
-          {!registering && <div className="flex items-center justify-between text-sm"><label className="flex items-center gap-2 text-sync-text-secondary"><input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} className="h-4 w-4 rounded border-sync-border text-sync-primary focus:ring-sync-primary" />Remember me</label><button type="button" onClick={() => setNotice('Password recovery is not available in the mock API yet.')} className="font-semibold text-sync-primary hover:underline">Forgot password?</button></div>}
+          {!registering && <div className="flex items-center justify-between text-sm"><button type="button" onClick={() => setNotice('Password recovery is not available yet.')} className="font-semibold text-sync-primary hover:underline">Forgot password?</button></div>}
           {error && <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}{notice && <p role="status" className="rounded-xl bg-blue-50 px-3 py-2 text-sm text-sync-primary">{notice}</p>}
           <Button type="submit" icon={Zap} className="w-full rounded-xl py-3.5" disabled={submitting}>{submitting ? 'Please wait...' : registering ? 'Create SyncSpace account' : 'Sign in with SyncSpace'}</Button>
         </form>
-        <div className="my-7 flex items-center gap-3 text-xs font-semibold uppercase tracking-widest text-slate-400"><span className="h-px flex-1 bg-sync-border" />or continue with<span className="h-px flex-1 bg-sync-border" /></div><div className="grid grid-cols-2 gap-3"><button type="button" onClick={() => social('GitHub')} className="rounded-xl border border-sync-border bg-white px-4 py-3 text-sm font-semibold transition hover:bg-slate-50">GitHub</button><button type="button" onClick={() => social('Google')} className="rounded-xl border border-sync-border bg-white px-4 py-3 text-sm font-semibold transition hover:bg-slate-50">Google</button></div>
         <p className="mt-7 text-center text-sm text-sync-text-secondary">{registering ? 'Already have an account?' : "Don't have an account?"} <button type="button" onClick={toggleMode} className="font-semibold text-sync-accent hover:underline">{registering ? 'Sign in' : 'Register for free'}</button></p>
-      </Card><p className="mt-5 text-center text-xs text-sync-text-secondary"><Sparkles className="mr-1 inline h-3.5 w-3.5" />Mock authentication for the SyncSpace demo</p></motion.div></main></div>;
+      </Card><p className="mt-5 text-center text-xs text-sync-text-secondary"><Sparkles className="mr-1 inline h-3.5 w-3.5" />Secure server-side authentication</p></motion.div></main></div>;
 }

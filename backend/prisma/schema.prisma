@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Users ──────────────────────────────────────────────────────────────────
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String    @unique @db.VarChar(255)
+  username     String?   @unique @db.VarChar(30)
+  name         String    @db.VarChar(100)
+  bio          String?   @db.VarChar(500)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  avatarUrl    String?   @map("avatar_url") @db.VarChar(500)
+  lastActiveAt DateTime? @default(now()) @map("last_active_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  workspaceMemberships WorkspaceMember[] @relation("UserToWorkspace")
+  notes                Note[]
+  codeFiles            CodeFile[]
+  whiteboards          Whiteboard[]
+  activityLogs         ActivityLog[]
+  presence             Presence[]
+  invitesSent          Invite[]          @relation("InvitedBy")
+
+  @@index([username])
+  @@map("users")
+}
+
+// ─── Workspaces ─────────────────────────────────────────────────────────────
+
+model Workspace {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @db.VarChar(100)
+  slug        String   @unique @db.VarChar(100)
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  members      WorkspaceMember[] @relation("WorkspaceToUser")
+  notes        Note[]
+  codeFiles    CodeFile[]
+  whiteboards  Whiteboard[]
+  activityLogs ActivityLog[]
+  presence     Presence[]
+  invites      Invite[]
+
+  @@index([slug])
+  @@map("workspaces")
+}
+
+// ─── Workspace Members (junction) ───────────────────────────────────────────
+
+model WorkspaceMember {
+  id          String   @id @default(uuid()) @db.Uuid
+  role        String   @default("member") @db.VarChar(20) // "owner" | "admin" | "member"
+  userId      String   @map("user_id") @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user      User      @relation("UserToWorkspace", fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation("WorkspaceToUser", fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@index([workspaceId])
+  @@map("workspace_members")
+}
+
+// ─── Notes ──────────────────────────────────────────────────────────────────
+
+model Note {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @default("") @db.VarChar(200)
+  content     String   @default("") @db.Text
+  isPinned    Boolean  @default(false) @map("is_pinned")
+  authorId    String   @map("author_id") @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([authorId])
+  @@index([workspaceId, updatedAt(sort: Desc)])
+  @@map("notes")
+}
+
+// ─── Code Files ─────────────────────────────────────────────────────────────
+
+model CodeFile {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @db.VarChar(255)
+  path        String   @db.VarChar(500)
+  content     String   @default("") @db.Text
+  language    String   @default("plaintext") @db.VarChar(50)
+  authorId    String   @map("author_id") @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, path])
+  @@index([workspaceId])
+  @@index([authorId])
+  @@map("code_files")
+}
+
+// ─── Whiteboards ────────────────────────────────────────────────────────────
+
+model Whiteboard {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @default("Untitled") @db.VarChar(100)
+  content     String   @default("{}") @db.Text // JSON: { history: string[], index: number }
+  snapshotUrl String?  @map("snapshot_url") @db.VarChar(500) // PNG data-URL or S3 key
+  authorId    String   @map("author_id") @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([authorId])
+  @@map("whiteboards")
+}
+
+// ─── Activity Logs ──────────────────────────────────────────────────────────
+
+model ActivityLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  action      String   @db.VarChar(50) // "note.created", "file.edited", etc.
+  entityType  String   @map("entity_type") @db.VarChar(50)
+  entityId    String?  @map("entity_id") @db.Uuid
+  metadata    Json?
+  userId      String   @map("user_id") @db.Uuid
+  workspaceId String?  @map("workspace_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, createdAt(sort: Desc)])
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@map("activity_logs")
+}
+
+// ─── Presence (live collaboration) ──────────────────────────────────────────
+
+model Presence {
+  id          String   @id @default(uuid()) @db.Uuid
+  status      String   @default("online") @db.VarChar(20) // "online" | "idle" | "offline"
+  cursor      Json? // { x, y } or { line, column } for editor
+  lastSeenAt  DateTime @default(now()) @map("last_seen_at")
+  userId      String   @map("user_id") @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@index([workspaceId])
+  @@map("presence")
+}
+
+// ─── Invites ────────────────────────────────────────────────────────────────
+
+model Invite {
+  id          String    @id @default(uuid()) @db.Uuid
+  email       String    @db.VarChar(255)
+  role        String    @default("member") @db.VarChar(20)
+  token       String    @unique @db.VarChar(64)
+  workspaceId String    @map("workspace_id") @db.Uuid
+  invitedById String    @map("invited_by_id") @db.Uuid
+  acceptedAt  DateTime? @map("accepted_at")
+  expiresAt   DateTime  @map("expires_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invitedBy User      @relation("InvitedBy", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@unique([email, workspaceId])
+  @@index([token])
+  @@index([workspaceId])
+  @@map("invites")
+}

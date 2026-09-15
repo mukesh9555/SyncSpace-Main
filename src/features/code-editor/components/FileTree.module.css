@@ -1,0 +1,88 @@
+.tree {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.empty {
+  padding: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  text-align: center;
+}
+
+.node {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--fs-sm);
+  color: var(--color-text);
+  transition: background 0.1s;
+}
+
+.node:hover {
+  background: var(--color-bg-alt, rgba(0, 0, 0, 0.05));
+}
+
+.node.active {
+  background: var(--color-primary-light, rgba(37, 99, 235, 0.1));
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.node.renaming {
+  padding: var(--space-1) var(--space-3);
+}
+
+.icon {
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+
+.name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions {
+  display: none;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.node:hover .actions {
+  display: flex;
+}
+
+.actionBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  opacity: 0.6;
+}
+
+.actionBtn:hover {
+  opacity: 1;
+  background: var(--color-bg-alt, rgba(0, 0, 0, 0.05));
+}
+
+.renameInput {
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  outline: none;
+}
